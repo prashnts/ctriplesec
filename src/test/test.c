@@ -1,31 +1,42 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "sha3/sha3.h"
 #include "contrib/hexutils.h"
 
-int main() {
-  sha3_ctx *context;
-  const unsigned char *msg = "SHA3";
+#include "contrib/cutest.h"
+
+
+void test_sha3_512_trivial() {
+  sha3_ctx context;
+  const unsigned char *msg = "";
 
   unsigned int byte_len = sizeof(unsigned char) * sha3_512_hash_size;
-
   unsigned char *result = malloc(byte_len);
-  char *hex = malloc(byte_len);
 
-  size_t len = sizeof(unsigned char) * strlen(msg);
+  const unsigned char known[] = {
+    0xa6, 0x9f, 0x73, 0xcc, 0xa2, 0x3a, 0x9a, 0xc5,
+    0xc8, 0xb5, 0x67, 0xdc, 0x18, 0x5a, 0x75, 0x6e,
+    0x97, 0xc9, 0x82, 0x16, 0x4f, 0xe2, 0x58, 0x59,
+    0xe0, 0xd1, 0xdc, 0xc1, 0x47, 0x5c, 0x80, 0xa6,
+    0x15, 0xb2, 0x12, 0x3a, 0xf1, 0xf5, 0xf9, 0x4c,
+    0x11, 0xe3, 0xe9, 0x40, 0x2c, 0x3a, 0xc5, 0x58,
+    0xf5, 0x00, 0x19, 0x9d, 0x95, 0xb6, 0xd3, 0xe3,
+    0x01, 0x75, 0x85, 0x86, 0x28, 0x1d, 0xcd, 0x26};
 
-  rhash_sha3_512_init(context);
+  rhash_sha3_512_init(&context);
+  rhash_sha3_update(&context, msg, strlen(msg));
+  rhash_sha3_final(&context, result);
 
-  rhash_sha3_update(context, msg, len);
-
-  rhash_sha3_final(context, result);
-
-  rhash_byte_to_hex(hex, result, byte_len, 0);
-
-  printf("%s %d %s\n", "SHA: ", byte_len, hex);
+  for (int i = 0; i < byte_len; i++) {
+    TEST_CHECK(known[i] == *(result + i));
+  }
 
   free(result);
-  free(hex);
-  return 0;
 }
+
+TEST_LIST = {
+    { "test_sha3_empty", test_sha3_512_trivial },
+    { 0 }
+};

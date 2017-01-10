@@ -12,20 +12,27 @@ SOURCES = $(wildcard src/*.c) $(wildcard src/*/*.c)
 _OBJ = $(SOURCES:.c=.o)
 OBJ = $(patsubst $(SDIR)/%,$(ODIR)/%,$(_OBJ))
 
+all: triplesec tests
+
 print-% : ; @echo $* = $($*)
 
 $(ODIR)/%.o: $(SDIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-triplesec: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+TSEC_TST = $(filter $(ODIR)/test/%,$(OBJ))
+TSEC_CLI = $(filter $(ODIR)/cli/%,$(OBJ))
+TSEC_LIB = $(filter-out $(ODIR)/cli/%,$(filter-out $(ODIR)/test/%,$(OBJ)))
 
-.PHONY: clean _build_dir
+libtriplesec: $(TSEC_LIB)
 
-_build_dir:
-	mkdir -p $(ODIR)
+triplesec: $(TSEC_CLI) $(TSEC_LIB)
+	$(CC) -o $(ODIR)/triplesec $^ $(CFLAGS)
+
+.PHONY: clean
+
+tests: $(TSEC_TST) $(TSEC_LIB)
+	$(CC) -o $(ODIR)/triplesec_tests $^ $(CFLAGS)
 
 clean:
 	rm -fr $(ODIR)
-	rm -f *~ triplesec

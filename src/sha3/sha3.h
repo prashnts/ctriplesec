@@ -2,6 +2,7 @@
 #ifndef RHASH_SHA3_H
 #define RHASH_SHA3_H
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
 
