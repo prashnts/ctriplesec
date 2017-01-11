@@ -29,10 +29,13 @@ libtriplesec: $(TSEC_LIB)
 triplesec: $(TSEC_CLI) $(TSEC_LIB)
 	$(CC) -o $(ODIR)/triplesec $^ $(CFLAGS)
 
-.PHONY: clean
+.PHONY: clean check
 
 tests: $(TSEC_TST) $(TSEC_LIB)
 	$(CC) -o $(ODIR)/triplesec_tests $^ $(CFLAGS)
+
+check: tests
+	$(ODIR)/triplesec_tests
 
 clean:
 	rm -fr $(ODIR)

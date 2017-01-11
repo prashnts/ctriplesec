@@ -1,8 +1,7 @@
 language: c
 compiler:
-- gcc
+  - gcc
 script:
-  - make
-  - ./build/triplesec_tests
+  - make check
 notifications:
   email: false
