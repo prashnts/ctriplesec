@@ -100,7 +100,7 @@ void test_twofish_vectors() {
 
   Twofish_key xkey;
 
-  Twofish_prepare_key(key, strlen(key), &xkey);
+  Twofish_prepare_key(key, sizeof(key), &xkey);
   Twofish_encrypt(&xkey, plain, cipher);
 
   int rc = mem_isequal(cipher, known_cipher, sizeof(known_cipher));
