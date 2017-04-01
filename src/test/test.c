@@ -2,8 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "libscrypt.h"
-
+#include "scrypt/libscrypt.h"
 #include "aes256ctr/aes256.h"
 #include "twofish/twofish.h"
 #include "sha3/sha3.h"

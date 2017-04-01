@@ -2,12 +2,8 @@ IDIR=src
 CC=gcc-6
 CFLAGS=-I$(IDIR)
 
-
 CFLAGS += -std=gnu99 -Wall -pedantic
 LDFLAGS += -L.
-
-CFLAGS += -I/usr/local/Cellar/libscrypt/1.21/include
-CFLAGS += -L/usr/local/Cellar/libscrypt/1.21/lib -lscrypt
 
 ODIR=build
 SDIR=src
