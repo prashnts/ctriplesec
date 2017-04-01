@@ -1,5 +1,5 @@
 IDIR=src
-CC=gcc-6
+CC=gcc
 CFLAGS=-I$(IDIR)
 
 CFLAGS += -std=gnu99 -Wall -pedantic
