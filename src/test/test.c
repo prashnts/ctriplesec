@@ -4,16 +4,16 @@
 
 #include "sha3/sha3.h"
 #include "contrib/hexutils.h"
-
 #include "contrib/cutest.h"
+#include "utils/helpers.h"
 
 
 void test_sha3_512_trivial() {
   sha3_ctx context;
   const unsigned char *msg = "";
 
-  unsigned int byte_len = sizeof(unsigned char) * sha3_512_hash_size;
-  unsigned char *result = malloc(byte_len);
+  const unsigned int byte_len = sizeof(unsigned char) * sha3_512_hash_size;
+  unsigned char result[byte_len];
 
   const unsigned char known[] = {
     0xa6, 0x9f, 0x73, 0xcc, 0xa2, 0x3a, 0x9a, 0xc5,
