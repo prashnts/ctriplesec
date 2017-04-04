@@ -113,18 +113,9 @@
     #include <io.h>
 #endif
 
-#ifdef __cplusplus
-    #include <exception>
-#endif
-
 
 /* Note our global private identifiers end with '__' to mitigate risk of clash
  * with the unit tests implementation. */
-
-
-#ifdef __cplusplus
-    extern "C" {
-#endif
 
 
 struct test__ {
@@ -319,27 +310,10 @@ test_do_run__(const struct test__* test)
         test_current_already_logged__ = 1;
     }
 
-#ifdef __cplusplus
-    try {
-#endif
+    fflush(stdout);
+    fflush(stderr);
 
-        /* This is good to do for case the test unit e.g. crashes. */
-        fflush(stdout);
-        fflush(stderr);
-
-        test->func();
-
-#ifdef __cplusplus
-    } catch(std::exception& e) {
-        const char* what = e.what();
-        if(what != NULL)
-            test_check__(0, NULL, 0, "Threw std::exception: %s", what);
-        else
-            test_check__(0, NULL, 0, "Threw std::exception");
-    } catch(...) {
-        test_check__(0, NULL, 0, "Threw an exception");
-    }
-#endif
+    test->func();
 
     if(test_verbose_level__ >= 3) {
         switch(test_current_failures__) {
@@ -648,10 +622,5 @@ main(int argc, char** argv)
 
 
 #endif  /* #ifndef TEST_NO_MAIN */
-
-#ifdef __cplusplus
-    }  /* extern "C" */
-#endif
-
 
 #endif  /* #ifndef CUTEST_H__ */
