@@ -6,6 +6,7 @@ CFLAGS += -std=gnu99 -Wall -pedantic
 LDFLAGS += -L.
 
 CFLAGS += -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -lssl -lcrypto
+CFLAGS += $(shell pkg-config --libs --cflags libsodium)
 
 ODIR=build
 SDIR=src
