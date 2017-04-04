@@ -5,14 +5,17 @@
 #include "scrypt/libscrypt.h"
 #include "aes256ctr/aes256.h"
 #include "twofish/twofish.h"
-#include "sha3/sha3.h"
+#include "sha3/digest.h"
 #include "contrib/hexutils.h"
 #include "contrib/cutest.h"
+#include "hmac/hmac.h"
 #include "utils/helpers.h"
+#include "utils/io.h"
+
+#include "sha3_test_vectors.h"
 
 
 void test_sha3_512_trivial() {
-  sha3_ctx context;
   const unsigned char *msg = "";
 
   const unsigned int byte_len = sizeof(unsigned char) * sha3_512_hash_size;
@@ -28,13 +31,22 @@ void test_sha3_512_trivial() {
     0xf5, 0x00, 0x19, 0x9d, 0x95, 0xb6, 0xd3, 0xe3,
     0x01, 0x75, 0x85, 0x86, 0x28, 0x1d, 0xcd, 0x26};
 
-  rhash_sha3_512_init(&context);
-  rhash_sha3_update(&context, msg, strlen(msg));
-  rhash_sha3_final(&context, result);
+  sha3_512(msg, strlen(msg), result);
 
   int rc = mem_isequal(result, known, sizeof(known));
   TEST_CHECK(rc == 0);
 }
+
+void test_sha3_512_standard() {
+  #define __MILLION 1000000
+  uint8_t digest[64];
+  uint8_t *msg = malloc(__MILLION);
+  memset(msg, 0x61, __MILLION);
+
+  sha3_512(msg, __MILLION, digest);
+  print_bytearray(digest, 64);
+}
+
 
 void test_scrypt() {
   uint8_t hashbuf[SCRYPT_HASH_LEN];
@@ -144,11 +156,59 @@ void test_aes256() {
   TEST_CHECK(rc == 0);
 }
 
+// https://tools.ietf.org/html/rfc4231
+
+void test_hmac_sha512() {
+  Hmac_Byte message[] = "hello from the other side";
+  Hmac_Byte key[] = "secr3t";
+  Hmac_Byte digest[EVP_MAX_MD_SIZE];
+
+  Hmac_Byte known_digest[] = {
+    0xa3, 0xe4, 0x16, 0x20, 0x5e, 0xc5, 0xcb, 0x62,
+    0x33, 0xc2, 0x8f, 0x10, 0x14, 0xb1, 0xac, 0x17,
+    0xa1, 0x89, 0x20, 0xe5, 0x4f, 0x20, 0x4c, 0xb4,
+    0xca, 0x9d, 0xc0, 0x5d, 0x8e, 0xcf, 0xc5, 0x91,
+    0xf3, 0xf9, 0x00, 0x4b, 0x64, 0x65, 0x61, 0xe8,
+    0x7d, 0x02, 0x3f, 0x0d, 0x96, 0x58, 0x53, 0x3f,
+    0xb9, 0xed, 0xa7, 0x6f, 0x71, 0x78, 0xdd, 0xf6,
+    0x5d, 0xbc, 0xb0, 0xeb, 0x88, 0x2b, 0xb2, 0x94
+  };
+
+  hmac_sha512(message, strlen(message), key, strlen(key), digest);
+  int rc = mem_isequal(digest, known_digest, EVP_MAX_MD_SIZE);
+  TEST_CHECK(rc == 0);
+}
+
+void test_hmac_sha3() {
+  Hmac_Byte message[] = "what do ya want for nothing?";
+  Hmac_Byte key[] = "Jefe";
+  Hmac_Byte digest[EVP_MAX_MD_SIZE];
+
+  Hmac_Byte known_digest[] = {
+    0xa3, 0xe4, 0x16, 0x20, 0x5e, 0xc5, 0xcb, 0x62,
+    0x33, 0xc2, 0x8f, 0x10, 0x14, 0xb1, 0xac, 0x17,
+    0xa1, 0x89, 0x20, 0xe5, 0x4f, 0x20, 0x4c, 0xb4,
+    0xca, 0x9d, 0xc0, 0x5d, 0x8e, 0xcf, 0xc5, 0x91,
+    0xf3, 0xf9, 0x00, 0x4b, 0x64, 0x65, 0x61, 0xe8,
+    0x7d, 0x02, 0x3f, 0x0d, 0x96, 0x58, 0x53, 0x3f,
+    0xb9, 0xed, 0xa7, 0x6f, 0x71, 0x78, 0xdd, 0xf6,
+    0x5d, 0xbc, 0xb0, 0xeb, 0x88, 0x2b, 0xb2, 0x94
+  };
+
+  hmac_sha3(message, strlen(message), key, strlen(key), digest);
+  print_bytearray(digest, EVP_MAX_MD_SIZE);
+  int rc = mem_isequal(digest, known_digest, EVP_MAX_MD_SIZE);
+  TEST_CHECK(rc == 0);
+}
+
 TEST_LIST = {
     { "SHA3 Empty Hash", test_sha3_512_trivial },
+    { "SHA3 Test Vectors", test_sha3_512_standard },
     { "Scrypt Key Derivation", test_scrypt },
     { "Twofish", test_twofish },
     { "Twofish Reference Vector", test_twofish_vectors },
     { "AES256 Reference", test_aes256 },
+    { "HMAC-SHA512", test_hmac_sha512 },
+    { "HMAC-SHA3", test_hmac_sha3 },
     { 0 }
 };
