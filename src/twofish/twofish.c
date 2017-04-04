@@ -1688,3 +1688,47 @@ void Twofish_decrypt( Twofish_key * xkey, Byte c[16], Byte p[16])
  * Also, I don't have any test vectors for any cipher modes
  * with Twofish.
  */
+
+void increment_ctr(Byte *val) {
+  // Assumes little endian
+  if (val != NULL) {
+    for (int i=15; i >= 0; i--) {
+      if (++val[i] != 0) {
+        break;
+      }
+    }
+  }
+}
+
+void xor_block(Byte *blk_c, Byte *buff, size_t buff_len, int ctr, Byte *c) {
+  int offset = ctr * 16;
+  for (int i=0; i < 16; i++) {
+    if ((offset + i) > buff_len) {
+      break;
+    }
+    c[offset + i] = buff[offset + i] ^ blk_c[i];
+  }
+}
+
+/*
+ * Let R2 be the the IV generated for Twofish in Step 2.
+ * Twofish-CTR works by encrypting R2, R2+1, R2+2,... with Twofish, and
+ * concatenating the result to yield a pad the size of C1.
+ * Call this pad P2.
+ * Output (R2 || (P2 ^ C1)), where "||" denotes concatenation.
+ */
+void Twofish_encrypt_ctr(Twofish_key *xkey, Byte iv[16], Byte *buff, size_t buff_len, Byte *c) {
+  int block_count = (buff_len / 16) + 1;
+  Byte blk_p[16], blk_c[16];
+
+  Byte r[16];
+  memcpy(r, iv, 16);
+
+  for (int i=0; i < block_count; i++) {
+    Twofish_encrypt(xkey, r, blk_c);
+    xor_block(blk_c, buff, buff_len, i, c);
+
+    // Increment counter
+    increment_ctr(r);
+  }
+}
