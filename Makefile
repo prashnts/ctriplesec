@@ -5,6 +5,8 @@ CFLAGS=-I$(IDIR)
 CFLAGS += -std=gnu99 -Wall -pedantic
 LDFLAGS += -L.
 
+CFLAGS += -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -lssl -lcrypto
+
 ODIR=build
 SDIR=src
 
