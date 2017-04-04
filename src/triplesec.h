@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "sodium.h"
+#include "scrypt/libscrypt.h"
+#include "twofish/twofish.h"
 #include "utils/io.h"
 
 #define TSEC_SALT_SIZE  16

@@ -2,6 +2,9 @@
 
 
 void triplesec_encrypt(uint8_t *pswd, size_t pswd_len, uint8_t *msg, size_t msg_len, uint8_t *cipher) {
+  sodium_init();
+  Twofish_initialise();
+
   uint8_t salt[TSEC_SALT_SIZE];
   uint8_t key[TSEC__SCRYPT_LEN];
   uint8_t iv_salsa20[TSEC__IV_SALSA20_LEN],
@@ -60,6 +63,16 @@ void triplesec_encrypt(uint8_t *pswd, size_t pswd_len, uint8_t *msg, size_t msg_
 
   memcpy(msg_twofish, iv_salsa20, TSEC__IV_SALSA20_LEN);
   memcpy(msg_twofish + TSEC__IV_SALSA20_LEN, pad_salsa20, len_salsa20);
+
+  // Twofish in CTR
+  Twofish_key xkey;
+  Twofish_prepare_key(key_twofish, 32, &xkey);
+  Twofish_encrypt_ctr(&xkey, iv_twofish, msg_twofish, len_twofish, pad_twofish);
+
+  memcpy(msg_aes, iv_twofish, TSEC__IV_TWOFISH_LEN);
+  memcpy(msg_aes + TSEC__IV_TWOFISH_LEN, pad_twofish, len_twofish);
+
+  // AES in CTR
 
   free(pad_salsa20);
   free(pad_twofish);
